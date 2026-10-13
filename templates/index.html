@@ -1,0 +1,269 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EcoRoute AI &mdash; Sustainable Route Recommendation System</title>
+  <meta name="description" content="AI-Based Sustainable Route Recommendation System. Compare eco-friendly, fastest, and balanced routes using sustainability scoring. Academic Phase 1 prototype."/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="nav-icon"></span>
+    <span class="nav-title">EcoRoute <span class="nav-ai">AI</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="#planner" class="nav-link">Route Planner</a>
+    <a href="#results" class="nav-link">Results</a>
+    <a href="#about"   class="nav-link">About</a>
+  </div>
+  <div class="nav-badge">Phase 1 Prototype</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="planner">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-chip">Academic Research Project</div>
+      <h1 class="hero-title">
+        AI-Based Sustainable<br>Route Recommendation
+      </h1>
+      <p class="hero-subtitle">
+        Compare routes by travel time, fuel consumption, CO&thinsp;&sup2; emissions,
+        and congestion &mdash; not just shortest distance.
+      </p>
+      <div class="disclaimer-banner">
+        <span class="disc-icon"></span>
+        <span>
+          <strong>Phase 1 Prototype:</strong> Simulated mode uses a synthetic 8-node graph.
+          Real map mode fetches OpenStreetMap data. All fuel and CO&thinsp;&sup2; values are
+          formula-based estimates, not measurements. ML scoring is a pending future extension.
+        </span>
+      </div>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div class="control-panel glass-card">
+
+      <!-- Mode toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-sim"  onclick="setMode('sim')">
+          <span></span>Simulated Mode
+        </button>
+        <button class="mode-btn"        id="btn-real" onclick="setMode('real')">
+          <span></span>Real Map Mode
+        </button>
+      </div>
+
+      <!-- SIMULATED inputs -->
+      <div id="sim-inputs" class="input-section">
+        <div class="input-row">
+          <div class="input-group">
+            <label class="input-label">Source Node</label>
+            <select id="sim-source" class="styled-select">
+              <option value="A">A &mdash; Neighbourhood Hub</option>
+              <option value="B">B &mdash; Residential Junction</option>
+              <option value="C">C &mdash; Commercial Area</option>
+              <option value="D">D &mdash; Industrial Zone</option>
+              <option value="E">E &mdash; Central Crossroads</option>
+              <option value="F">F &mdash; Ring-Road Junction</option>
+              <option value="G">G &mdash; South-West Exit</option>
+              <option value="H">H &mdash; South-East Exit</option>
+            </select>
+          </div>
+          <div class="swap-btn-wrap">
+            <button class="swap-btn" onclick="swapSimNodes()" title="Swap source and destination">&#8644;</button>
+          </div>
+          <div class="input-group">
+            <label class="input-label">Destination Node</label>
+            <select id="sim-dest" class="styled-select">
+              <option value="A">A &mdash; Neighbourhood Hub</option>
+              <option value="B">B &mdash; Residential Junction</option>
+              <option value="C">C &mdash; Commercial Area</option>
+              <option value="D">D &mdash; Industrial Zone</option>
+              <option value="E">E &mdash; Central Crossroads</option>
+              <option value="F">F &mdash; Ring-Road Junction</option>
+              <option value="G">G &mdash; South-West Exit</option>
+              <option value="H" selected>H &mdash; South-East Exit</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- REAL MAP inputs -->
+      <div id="real-inputs" class="input-section hidden">
+        <p class="map-instruction"><strong>Click the map twice</strong> to set Origin and Destination, or type coordinates below.</p>
+        <div class="coord-row">
+          <div class="coord-pair">
+            <label class="input-label">Origin (lat, lon)</label>
+            <div class="coord-inputs">
+              <input type="number" id="orig-lat" placeholder="e.g. 12.9716" step="any" class="coord-input"/>
+              <input type="number" id="orig-lon" placeholder="e.g. 77.5946" step="any" class="coord-input"/>
+            </div>
+          </div>
+          <div class="swap-btn-wrap">
+            <button class="swap-btn" onclick="swapRealCoords()" title="Swap">&#8644;</button>
+          </div>
+          <div class="coord-pair">
+            <label class="input-label">Destination (lat, lon)</label>
+            <div class="coord-inputs">
+              <input type="number" id="dest-lat" placeholder="e.g. 12.9352" step="any" class="coord-input"/>
+              <input type="number" id="dest-lon" placeholder="e.g. 77.6245" step="any" class="coord-input"/>
+            </div>
+          </div>
+        </div>
+        <p class="real-note">Real mode downloads OpenStreetMap data and may take 5&ndash;30 seconds. Requires internet access.</p>
+      </div>
+
+      <!-- Preference selector -->
+      <div class="preference-section">
+        <label class="input-label">Route Preference</label>
+        <div class="pref-cards" id="pref-cards">
+          <div class="pref-card active" data-pref="fastest" onclick="selectPref(this)">
+            <div class="pref-icon"></div>
+            <div class="pref-name">Fastest</div>
+            <div class="pref-desc">Travel time &mdash; 60% weight</div>
+          </div>
+          <div class="pref-card" data-pref="eco" onclick="selectPref(this)">
+            <div class="pref-icon"></div>
+            <div class="pref-name">Eco-Friendly</div>
+            <div class="pref-desc">Fuel + CO&thinsp;&sup2; &mdash; 40% + 40%</div>
+          </div>
+          <div class="pref-card" data-pref="balanced" onclick="selectPref(this)">
+            <div class="pref-icon"></div>
+            <div class="pref-name">Balanced</div>
+            <div class="pref-desc">Equal weight &mdash; 25% each</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="calculate-btn" id="calc-btn" onclick="calculateRoutes()">
+        <span id="calc-label">Calculate Routes</span>
+        <span id="calc-spinner" class="spinner hidden"></span>
+      </button>
+
+      <div id="error-banner" class="error-banner hidden"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="map-section">
+  <div id="map"></div>
+  <div class="map-legend" id="map-legend">
+    <div class="legend-item"><span class="legend-dot recommended"></span> Recommended</div>
+    <div class="legend-item"><span class="legend-dot shortest"></span> Shortest</div>
+    <div class="legend-item"><span class="legend-dot fastest"></span> Fastest</div>
+    <div class="legend-item"><span class="legend-dot other"></span> Other routes</div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results-section" id="results">
+  <div id="results-placeholder" class="results-placeholder">
+    <div class="placeholder-icon">&#9632;</div>
+    <h2>Route results will appear here</h2>
+    <p>Select a source, destination, and preference, then click Calculate Routes.</p>
+  </div>
+
+  <div id="results-content" class="hidden">
+
+    <div class="results-header">
+      <h2 class="results-title">Route Results</h2>
+      <div id="data-mode-badge" class="data-badge"></div>
+    </div>
+
+    <div class="recommended-hero" id="rec-hero"></div>
+
+    <h3 class="section-label">All Candidate Routes</h3>
+    <div class="routes-grid" id="routes-grid"></div>
+
+    <h3 class="section-label">Baseline Comparison</h3>
+    <p class="section-note">How the AI-recommended route compares to conventional routing methods.</p>
+    <div class="table-wrap">
+      <table class="comparison-table" id="comparison-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Route</th>
+            <th>Distance (km)</th>
+            <th>Time (min)</th>
+            <th>Fuel (L)</th>
+            <th>CO&thinsp;&sup2; (kg)</th>
+            <th>Avg Congestion</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="comparison-tbody"></tbody>
+      </table>
+    </div>
+
+    <h3 class="section-label">Score Weight Breakdown</h3>
+    <div class="weight-breakdown" id="weight-breakdown"></div>
+
+    <div class="pending-box">
+      <h4>Pending Extensions &mdash; Not Yet Implemented</h4>
+      <ul>
+        <li><strong>ML Scoring:</strong> Random Forest / XGBoost model will replace formula-based scoring when training data is available.</li>
+        <li><strong>Pollution Exposure:</strong> Air quality API integration planned for Phase 2.</li>
+        <li><strong>EV Support:</strong> Electric vehicle battery model planned for Phase 2.</li>
+        <li><strong>Live Traffic:</strong> Real-time congestion data integration planned when a free API is identified.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about-section" id="about">
+  <div class="about-header">
+    <h2>How It Works</h2>
+    <p>
+      EcoRoute AI scores every candidate route on four normalised metrics.
+      Preference profiles let you control which factors matter most.
+    </p>
+  </div>
+  <div class="about-grid">
+    <div class="about-card">
+      <span class="about-card-num">01</span>
+      <div class="about-icon"></div>
+      <h3>Multi-Factor Scoring</h3>
+      <p>Routes ranked by a normalised weighted sum of travel time, fuel, CO&thinsp;&sup2;, and congestion. Weights are fully configurable per preference profile.</p>
+    </div>
+    <div class="about-card">
+      <span class="about-card-num">02</span>
+      <div class="about-icon"></div>
+      <h3>Three Preference Profiles</h3>
+      <p>Fastest prioritises travel time at 60%. Eco-Friendly weights fuel and CO&thinsp;&sup2; at 40% each. Balanced distributes weight equally at 25% per metric.</p>
+    </div>
+    <div class="about-card">
+      <span class="about-card-num">03</span>
+      <div class="about-icon"></div>
+      <h3>Real and Simulated Modes</h3>
+      <p>The simulated 8-node graph is always available offline for instant demos. Real mode fetches genuine road geometry from OpenStreetMap via OSMnx.</p>
+    </div>
+    <div class="about-card">
+      <span class="about-card-num">04</span>
+      <div class="about-icon"></div>
+      <h3>Comparative Evaluation</h3>
+      <p>Every result set includes the AI recommendation alongside the shortest-distance and fastest-time conventional baselines for clear academic comparison.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>AI-Based Sustainable Route Recommendation System &mdash; Academic Phase 1 Prototype</p>
+  <p>Road data: OpenStreetMap &copy; contributors (ODbL) &bull; Fuel / CO&thinsp;&sup2;: Synthetic estimates &bull; ML scoring: Pending</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

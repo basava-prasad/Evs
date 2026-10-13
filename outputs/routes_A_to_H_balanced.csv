@@ -1,0 +1,11 @@
+rank,path,distance_km,travel_time_min,fuel_L,co2_kg,avg_congestion,sustainability_score,preference,is_recommended,pollution_exposure_note
+1,A -> B -> E -> F -> H,8.8,12.02,0.8896,2.055,0.25,0.995618,balanced,True,FUTURE EXTENSION - not yet implemented
+2,A -> B -> E -> G -> H,8.2,13.58,0.8824,2.0383,0.35,0.837735,balanced,False,FUTURE EXTENSION - not yet implemented
+3,A -> B -> E -> C -> F -> H,11.8,14.76,1.1816,2.7295,0.25,0.767448,balanced,False,FUTURE EXTENSION - not yet implemented
+4,A -> B -> D -> G -> H,8.0,17.33,0.9312,2.1511,0.4375,0.621871,balanced,False,FUTURE EXTENSION - not yet implemented
+5,A -> B -> D -> E -> F -> H,10.5,18.77,1.146,2.6473,0.35,0.581364,balanced,False,FUTURE EXTENSION - not yet implemented
+6,A -> B -> E -> D -> G -> H,9.3,17.9,1.0468,2.4181,0.42,0.564424,balanced,False,FUTURE EXTENSION - not yet implemented
+7,A -> B -> D -> E -> G -> H,9.9,20.33,1.1388,2.6306,0.43,0.450147,balanced,False,FUTURE EXTENSION - not yet implemented
+8,A -> B -> D -> E -> C -> F -> H,13.5,21.51,1.438,3.3218,0.3333,0.37546,balanced,False,FUTURE EXTENSION - not yet implemented
+9,A -> B -> D -> G -> E -> F -> H,13.0,22.76,1.4136,3.2654,0.3417,0.355903,balanced,False,FUTURE EXTENSION - not yet implemented
+10,A -> B -> D -> G -> E -> C -> F -> H,16.0,25.5,1.7056,3.9399,0.3286,0.1452,balanced,False,FUTURE EXTENSION - not yet implemented

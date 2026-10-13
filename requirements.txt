@@ -1,0 +1,27 @@
+﻿# requirements.txt
+# =================
+# AI-Based Sustainable Route Recommendation System
+# Install with: pip install -r requirements.txt
+
+# Core graph and routing
+networkx>=3.7
+
+# Data processing
+pandas>=3.0
+numpy>=2.5
+
+# Visualisation (CLI mode)
+matplotlib>=3.11
+
+# Machine learning (Phase 2 - environment ready)
+scikit-learn>=1.9
+
+# Web dashboard
+flask>=3.1
+
+# Real road network from OpenStreetMap
+osmnx>=2.1
+
+# Future additions (do not install yet):
+#   xgboost   - gradient boosting for ML scoring
+#   folium    - alternative map library
